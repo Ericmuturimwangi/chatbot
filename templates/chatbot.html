@@ -77,17 +77,35 @@
     <div class="card-body messages-box">
       
       <ul class="list-unstyled messages-list">
-        
-        <li class="message received">
-          <div class="message-text">
-            <div class="message-sender">
-              <b>AI Chatbot</b>
+      
+        {% for chat in chats %}
+          {% if chat.user == request.user %}
+
+          <li class="message sent">
+            <div class="message-text">
+              <div class="message-sender">
+                <b>User</b>
+              </div>
+              <div class="message-content">
+                {{chat.message}}
+              </div>
             </div>
-            <div class="message-content">
-              Hi, I am your AI Chatbot, you can ask me anything.
+          </li>
+
+          <li class="message received">
+            <div class="message-text">
+              <div class="message-sender">
+                <b>Chatbot</b>
+              </div>
+              <div class="message-content">
+                {{chat.response}}
+              </div>
             </div>
-          </div>
-        </li>
+          </li>
+
+          {% endif %}
+
+        {% endfor %}
       </ul>
       
     </div>

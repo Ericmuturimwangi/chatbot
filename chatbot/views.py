@@ -3,30 +3,37 @@ from django.http import JsonResponse
 import openai
 from django.contrib import auth
 from django.contrib.auth.models import User
+from django.utils import timezone
+
+from .models import Chat
 
 # Create your views here.
-openai_api_key = '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'
+openai_api_key = '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'
 openai.api_key = openai_api_key
 
 def ask_openai(message):
-    response = openai.Completion.create(
-        model = "gpt-3.5-turbo-0125",
-        prompt = message,
-        max_tokens = 150,
-        n=1,
-        stop=None,
-        temperature = 0.7,
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "Helpful assistant."},
+            {"role": "user", "content": message},
+        ]
     )
-    print(response)
-    answer = response.choices[0].text.strip()
+    answer = response.choices[0].message.content.strip()
     return answer
 
 def chatbot(request):
+    chats = Chat.objects.filter(user=request.user)
+
+
     if request.method == 'POST':
         message = request.POST.get('message')
         response = ask_openai(message)
+
+        chat = Chat(user=request.user, message=message, response=response, created_at=timezone.now())
+        chat.save()
         return JsonResponse({'message': message, 'response': response})
-    return render(request, 'chatbot.html')
+    return render(request, 'chatbot.html', {'chats':chats})
 
 def login(request):
     if request.method == 'POST':
